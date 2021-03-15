@@ -1,0 +1,12 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="'/espacos/tabs/descobrir"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center" class="ion-margin">{{ place.name }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-button color="primary" margin (click)="onBookPlace()" class="ion-margin">Agendar</ion-button>
+</ion-content>
