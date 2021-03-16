@@ -4,9 +4,81 @@
       <ion-back-button defaultHref="/espacos/tabs/ofertas"></ion-back-button>
     </ion-buttons>
     <ion-title>Nova Oferta</ion-title>
+    <ion-buttons slot="primary">
+      <ion-button (click)="onCreateOffer()" [disabled]="!form.valid">
+        <ion-icon name="checkmark" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-
+<ion-content padding>
+  <form [formGroup]="form">
+    <ion-grid>
+      <ion-row>
+        <ion-col size-sm="6" offset-sm="3">
+          <ion-item>
+            <ion-label position="floating">Nome</ion-label>
+            <ion-input type="text" autocomplete autocorrect formControlName="name"></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size-sm="6" offset-sm="3">
+          <ion-item>
+            <ion-label position="floating">Descrição</ion-label>
+            <ion-textarea rows="3" formControlName="description"></ion-textarea>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngIf="form.get('description').valid && form.get('description').touched">
+        <ion-col size-sm="6" offset-sm="3">
+          <p>A descrição não pode exceder os 100 caracteres.</p>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size-sm="6" offset-sm="3">
+          <ion-item>
+            <ion-label>Modo de Pagamento</ion-label>
+            <ion-select formControlName="paytype">
+              <ion-select-option value="comission">Comissão (Percentagem)</ion-select-option>
+              <ion-select-option value="perhour">Valor por Hora</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size-sm="6" offset-sm="3">
+          <ion-item>
+            <ion-label position="floating">Valor</ion-label>
+            <ion-input type="number" formControlName="price"></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size-sm="3" offset-sm="3">
+          <ion-item>
+            <ion-label position="stacked">Disponibilidade de</ion-label>
+            <ion-datetime min="2019-01-01" max="2025-12-31" displayFormat="D MMM YYYY H:mm" formControlName="dateFrom"
+            monthNames="janeiro, fevereiro, março, abril, maio, junho, julho, agosto, setembro, outubro, novembro, dezembro"
+            monthShortNames="jan, fev, mar, mai, abr, jun, jul, ago, set, out, nov, dez"
+            dayNames="domingo, segunda-feira, terça-feira, quarta-feira, quinta-feira, sexta-feira, sábado"
+            dayShortNames="dom, seg, ter, qua, qui, sex, sab"
+            ></ion-datetime>
+          </ion-item>
+        </ion-col>
+        <ion-col size-sm="3">
+          <ion-item>
+            <ion-label position="stacked">E até</ion-label>
+            <ion-datetime min="2019-01-02" max="2025-12-31" displayFormat="D MMM YYYY H:mm" formControlName="dateTo"
+            monthNames="janeiro, fevereiro, março, abril, maio, junho, julho, agosto, setembro, outubro, novembro, dezembro"
+            monthShortNames="jan, fev, mar, mai, abr, jun, jul, ago, set, out, nov, dez"
+            dayNames="domingo, segunda-feira, terça-feira, quarta-feira, quinta-feira, sexta-feira, sábado"
+            dayShortNames="dom, seg, ter, qua, qui, sex, sab"
+            ></ion-datetime>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </form>
 </ion-content>

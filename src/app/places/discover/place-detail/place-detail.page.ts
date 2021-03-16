@@ -17,8 +17,8 @@ export class PlaceDetailPage implements OnInit {
   place: Place;
 
   constructor(private router: Router, private route: ActivatedRoute, private navCtrl: NavController,
-    private modalCtrl: ModalController, private placesService: PlacesService,
-    private actSheetCtrl: ActionSheetController) { }
+              private modalCtrl: ModalController, private placesService: PlacesService,
+              private actSheetCtrl: ActionSheetController) { }
 
   ngOnInit() {
 
@@ -64,7 +64,7 @@ export class PlaceDetailPage implements OnInit {
   openBookingModal(mode: 'select' | 'random') {
     console.log(mode);
     this.modalCtrl.create({
-      component: CreateBookingComponent, componentProps: {selectedPlace: this.place }}).then(modalEl => {
+      component: CreateBookingComponent, componentProps: {selectedPlace: this.place, selectedMode: mode }}).then(modalEl => {
       modalEl.present();
       return modalEl.onDidDismiss();
     }).then(resultData => {

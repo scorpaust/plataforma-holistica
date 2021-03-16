@@ -11,7 +11,9 @@ export class BookingsService {
       id: 'b1',
       placeId: 'p1',
       placeName: 'Naniora',
-      guestNumber: 2,
+      eventType: 'Terapia',
+      minGuestNumber: 2,
+      maxGuestNumber: 10,
       userId: 'abc'
     }
   ]

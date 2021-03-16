@@ -10,6 +10,82 @@
 </ion-header>
 
 <ion-content class="ion-text-center" class="ion-margin, ion-padding">
-  <p>{{ selectedPlace.description }}</p>
-  <ion-button color="primary" (click)="onBookPlace()">Agendar</ion-button>
+  <form (ngSubmit)="onBookPlace()" #f="ngForm">
+    <ion-grid>
+      <ion-row>
+        <ion-col size-sm="6" offset-sm="3">
+          <ion-item>
+            <ion-label position="floating">Nome:</ion-label>
+            <ion-input type="text" ngModel name="first-name" required></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size-sm="6" offset-sm="3">
+          <ion-item>
+            <ion-label position="floating">Apelido:</ion-label>
+            <ion-input type="text" ngModel name="last-name" required></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size-sm="6" offset-sm="3">
+          <ion-item>
+            <ion-label position="floating">Tipo de Evento:</ion-label>
+            <ion-select [ngModel]="'terapia'" name="tipo-evento">
+              <ion-select-option value="curso">Curso</ion-select-option>
+              <ion-select-option value="terapia">Terapia</ion-select-option>
+              <ion-select-option value="workshop">Workshop</ion-select-option>
+              <ion-select-option value="outro">Outro</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size-sm="3" offset-sm="3">
+          <ion-label position="floating">Início:</ion-label>
+          <ion-datetime [ngModel]="startDate" name="dateFrom" displayFormat="D MMM YYYY H:mm"
+          [min]="selectedPlace.availableFrom.toISOString()" [max]="selectedPlace.availableTo.toISOString()"
+          required #startDateCtrl="ngModel"
+          monthNames="janeiro, fevereiro, março, abril, maio, junho, julho, agosto, setembro, outubro, novembro, dezembro"
+          monthShortNames="jan, fev, mar, mai, abr, jun, jul, ago, set, out, nov, dez"
+          dayNames="domingo, segunda-feira, terça-feira, quarta-feira, quinta-feira, sexta-feira, sábado"
+          dayShortNames="dom, seg, ter, qua, qui, sex, sab"
+          doneText="Confirmar"
+          cancelText="Cancelar"
+          >
+
+        </ion-datetime>
+        </ion-col>
+        <ion-col size-sm="3">
+          <ion-label position="floating">Fim:</ion-label>
+          <ion-datetime [ngModel]="endDate" name="dateTo" displayFormat="D MMM YYYY H:mm" [min]="startDateCtrl.value"
+          [max]="selectedPlace.availableTo.toISOString()" required
+          required #startDateCtrl="ngModel"
+          monthNames="janeiro, fevereiro, março, abril, maio, junho, julho, agosto, setembro, outubro, novembro, dezembro"
+          monthShortNames="jan, fev, mar, mai, abr, jun, jul, ago, set, out, nov, dez"
+          dayNames="domingo, segunda-feira, terça-feira, quarta-feira, quinta-feira, sexta-feira, sábado"
+          dayShortNames="dom, seg, ter, qua, qui, sex, sab"
+          doneText="Confirmar"
+          cancelText="Cancelar"
+          ></ion-datetime>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size-sm="3" offset-sm="3">
+          <ion-label position="floating">Mínimo de Pessoas</ion-label>
+          <ion-input ngModel name="min-guests" required minlength="1" #minGuests="ngModel"></ion-input>
+        </ion-col>
+        <ion-col size-sm="3">
+          <ion-label position="floating">Máximo de Pessoas</ion-label>
+          <ion-input ngModel name="max-guests" required minlength="minGuests"></ion-input>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size-sm="6" offset-sm="3">
+          <ion-button color="primary" type="submit" expand="block" [disabled]="!f.valid || !datesValid() || !guestsValid()">Agendar</ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </form>
 </ion-content>

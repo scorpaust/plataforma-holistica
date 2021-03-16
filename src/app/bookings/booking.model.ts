@@ -5,6 +5,8 @@ export class Booking {
     public placeId: string,
     public userId: string,
     public placeName: string,
-    public guestNumber: number
+    public eventType: string,
+    public minGuestNumber: number,
+    public maxGuestNumber: number
   ) {}
 }
