@@ -1,10 +1,11 @@
+import { ActionSheetController, ModalController, NavController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
-import { ModalController, NavController } from '@ionic/angular';
 
 import { CreateBookingComponent } from '../../../bookings/create-booking/create-booking.component';
 import { Place } from '../../place.model';
 import { PlacesService } from '../../places.service';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 @Component({
   selector: 'app-place-detail',
@@ -15,7 +16,9 @@ export class PlaceDetailPage implements OnInit {
 
   place: Place;
 
-  constructor(private router: Router, private route: ActivatedRoute, private navCtrl: NavController, private modalCtrl: ModalController, private placesService: PlacesService) { }
+  constructor(private router: Router, private route: ActivatedRoute, private navCtrl: NavController,
+    private modalCtrl: ModalController, private placesService: PlacesService,
+    private actSheetCtrl: ActionSheetController) { }
 
   ngOnInit() {
 
@@ -32,6 +35,34 @@ export class PlaceDetailPage implements OnInit {
   onBookPlace() {
     //     this.router.navigateByUrl('/espacos/tabs/descobrir');
       // this.navCtrl.navigateBack('/espacos/tabs/descobrir');
+    this.actSheetCtrl.create({
+      header: 'Escolha uma opção',
+      buttons: [
+        {
+          text: 'Selecionar Data',
+          handler: () => {
+            this.openBookingModal('select');
+          }
+        },
+        {
+          text: 'Data Aleatória',
+          handler: () => {
+            this.openBookingModal('random');
+          }
+        },
+        {
+          text: 'Cancelar',
+          role: 'destructive'
+        }
+      ]
+    }).then(actSheetEl => {
+      actSheetEl.present();
+    });
+
+  }
+
+  openBookingModal(mode: 'select' | 'random') {
+    console.log(mode);
     this.modalCtrl.create({
       component: CreateBookingComponent, componentProps: {selectedPlace: this.place }}).then(modalEl => {
       modalEl.present();
