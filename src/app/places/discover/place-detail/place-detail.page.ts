@@ -1,20 +1,21 @@
 import { ActionSheetController, ModalController, NavController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
 import { CreateBookingComponent } from '../../../bookings/create-booking/create-booking.component';
 import { Place } from '../../place.model';
 import { PlacesService } from '../../places.service';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-place-detail',
   templateUrl: './place-detail.page.html',
   styleUrls: ['./place-detail.page.scss'],
 })
-export class PlaceDetailPage implements OnInit {
+export class PlaceDetailPage implements OnInit, OnDestroy {
 
   place: Place;
+  placeSub: Subscription;
 
   constructor(private router: Router, private route: ActivatedRoute, private navCtrl: NavController,
               private modalCtrl: ModalController, private placesService: PlacesService,
@@ -27,7 +28,9 @@ export class PlaceDetailPage implements OnInit {
         this.navCtrl.navigateBack('/espacos/tabs/ofertas');
         return;
       }
-      this.place = this.placesService.getPlace(paramMap.get('espacoId'));
+      this.placeSub = this.placesService.getPlace(paramMap.get('espacoId')).subscribe(place => {
+        this.place = place;
+      });
       console.log(this.place);
     });
   }
@@ -73,5 +76,11 @@ export class PlaceDetailPage implements OnInit {
         console.log('AGENDADO!');
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.placeSub) {
+      this.placeSub.unsubscribe();
+    }
   }
 }
