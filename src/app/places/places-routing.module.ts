@@ -13,48 +13,56 @@ const routes: Routes = [
         children: [
           {
             path: '',
-            loadChildren: () => import('./discover/discover.module').then( m => m.DiscoverPageModule),
+            loadChildren: () =>
+              import('./discover/discover.module').then(
+                (m) => m.DiscoverPageModule
+              ),
           },
           {
             path: ':espacoId',
-            loadChildren: () => import('./discover/place-detail/place-detail.module').then( m => m.PlaceDetailPageModule)
-          }
-        ]
+            loadChildren: () =>
+              import('./discover/place-detail/place-detail.module').then(
+                (m) => m.PlaceDetailPageModule
+              ),
+          },
+        ],
       },
       {
         path: 'ofertas',
         children: [
           {
             path: '',
-            loadChildren: () => import('./offers/offers.module').then( m => m.OffersPageModule)
+            loadChildren: () =>
+              import('./offers/offers.module').then((m) => m.OffersPageModule),
           },
           {
             path: 'nova',
-            loadChildren: () => import('./offers/new-offer/new-offer.module').then( m => m.NewOfferPageModule)
+            loadChildren: () =>
+              import('./offers/new-offer/new-offer.module').then(
+                (m) => m.NewOfferPageModule
+              ),
           },
           {
             path: 'editar/:espacoId',
-            loadChildren: () => import('./offers/edit-offer/edit-offer.module').then( m => m.EditOfferPageModule)
+            loadChildren: () =>
+              import('./offers/edit-offer/edit-offer.module').then(
+                (m) => m.EditOfferPageModule
+              ),
           },
-          {
-            path: ':espacoId',
-            loadChildren: () => import('./offers/offer-bookings/offer-bookings.module').then( m => m.OfferBookingsPageModule)
-          },
-        ]
+        ],
       },
       {
         path: '',
         redirectTo: '/espacos/tabs/descobrir',
-        pathMatch: 'full'
-      }
-    ]
+        pathMatch: 'full',
+      },
+    ],
   },
   {
     path: '',
     redirectTo: '/espacos/tabs/descobrir',
-    pathMatch: 'full'
-  }
-
+    pathMatch: 'full',
+  },
 ];
 
 @NgModule({

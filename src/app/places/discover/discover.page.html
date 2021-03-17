@@ -16,20 +16,34 @@
       Para Agendamento
     </ion-segment-button>
   </ion-segment>
-  <ion-grid>
+  <ion-grid *ngIf="isLoading">
+    <ion-row>
+      <ion-col size=12 size-sm="8" offset-sm="2" class="ion-text-center">
+        <ion-spinner color="primary"></ion-spinner>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-grid *ngIf="!isLoading && (!relevantPlaces || relevantPlaces.length <= 0)">
+    <ion-row>
+      <ion-col size=12 size-sm="8" offset-sm="2" class="ion-text-center">
+        <p>Não existem, de momento, espaços holísticos disponíveis para agendamento.</p>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-grid *ngIf="!isLoading && relevantPlaces.length > 0">
     <ion-row>
       <ion-col size=12 size-sm="8" offset-sm="2" class="ion-text-center">
         <ion-card>
           <ion-card-header>
-            <ion-card-title>{{ loadedPlaces[0].name }}</ion-card-title>
-            <ion-card-subtitle>{{ loadedPlaces[0].payType == 'Comissão' ? 'Comissão: ' + loadedPlaces[0].price + ' ' + '%' : loadedPlaces[0].price + ' ' + '€' + ' ' + '/hora'  }}</ion-card-subtitle>
+            <ion-card-title>{{ relevantPlaces[0].name }}</ion-card-title>
+            <ion-card-subtitle>{{ relevantPlaces[0].payType == 'Comissão' ? 'Comissão: ' + relevantPlaces[0].price + ' ' + '%' : relevantPlaces[0].price + ' ' + '€' + ' ' + '/hora'  }}</ion-card-subtitle>
           </ion-card-header>
-          <ion-img class="loadedPagesImg" [src]="loadedPlaces[0].imageUrl"></ion-img>
+          <ion-img class="loadedPagesImg" [src]="relevantPlaces[0].imageUrl"></ion-img>
           <ion-card-content>
-            <p>{{ loadedPlaces[0].description }}</p>
+            <p>{{ relevantPlaces[0].description }}</p>
           </ion-card-content>
           <div class="ion-text-right">
-            <ion-button fill="clear" color="primary" [routerLink]="['/', 'espacos', 'tabs', 'descobrir', loadedPlaces[0].id]">Ver mais...</ion-button>
+            <ion-button fill="clear" color="primary" [routerLink]="['/', 'espacos', 'tabs', 'descobrir', relevantPlaces[0].id]">Ver mais...</ion-button>
           </div>
         </ion-card>
       </ion-col>

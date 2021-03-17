@@ -8,14 +8,9 @@ import { Place } from '../../place.model';
   styleUrls: ['./offer-item.component.scss'],
 })
 export class OfferItemComponent implements OnInit {
-
   @Input() offer: Place;
 
-  constructor() { }
+  constructor() {}
 
   ngOnInit() {}
-
-  getDummyDate() {
-    return new Date();
-  }
 }

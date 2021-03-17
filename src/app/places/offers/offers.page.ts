@@ -12,21 +12,35 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./offers.page.scss'],
 })
 export class OffersPage implements OnInit, OnDestroy {
-
   offers: Place[];
   private placesSub: Subscription;
+  isLoading = false;
 
-  constructor(private placesService: PlacesService, private router: Router) { }
+  constructor(private placesService: PlacesService, private router: Router) {}
 
   ngOnInit() {
-  this.placesSub = this.placesService.places.subscribe(places => {
+    this.placesSub = this.placesService.places.subscribe((places) => {
       this.offers = places;
-    })
+    });
+  }
+
+  ionViewWillEnter() {
+    this.isLoading = true;
+    this.placesService.fetchPlaces().subscribe(() => {
+      this.isLoading = false;
+    });
   }
 
   onEdit(offerId: string, slidingItem: IonItemSliding) {
     slidingItem.close();
-    this.router.navigate(['/', 'espacos', 'tabs', 'ofertas', 'editar', offerId]);
+    this.router.navigate([
+      '/',
+      'espacos',
+      'tabs',
+      'ofertas',
+      'editar',
+      offerId,
+    ]);
     console.log('Editando...', offerId);
   }
 
@@ -35,5 +49,4 @@ export class OffersPage implements OnInit, OnDestroy {
       this.placesSub.unsubscribe();
     }
   }
-
 }

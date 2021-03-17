@@ -10,13 +10,21 @@
 <ion-content>
   <ion-grid>
     <ion-row>
-      <ion-col size-md="6" offset-md="3">
+      <ion-col size-md="6" offset-md="3" *ngIf="!loadedBookings || loadedBookings.length <= 0" class="ion-text-center">
+        <p>Não possui agendamentos registados.</p>
+      </ion-col>
+      <ion-col size-md="6" offset-md="3" *ngIf="loadedBookings && loadedBookings.length > 0">
         <ion-list>
           <ion-item-sliding *ngFor="let booking of loadedBookings" #slidingBooking>
             <ion-item>
               <ion-label>
                 <h5>{{ booking.placeName }}</h5>
-                <p>Ocupação: {{ booking.guestNumber }}</p>
+                <p>Mínimo de Pessoas: {{ booking.minGuestNumber }}</p>
+                <p>Máximo de Pessoas: {{ booking.maxGuestNumber }}</p>
+                <p>Data de Início: {{ booking.bookedFrom.toLocaleDateString('pt-PT') }} </p>
+                <p>Hora de Início: {{ booking.bookedFrom.toLocaleTimeString('pt-PT', {hour: '2-digit', minute:'2-digit'}) }}</p>
+                <p>Data de Fim: {{ booking.bookedTo.toLocaleDateString('pt-PT') }}</p>
+                <p>Hora de Fim: {{ booking.bookedTo.toLocaleTimeString('pt-PT', {hour: '2-digit', minute:'2-digit'}) }}</p>
               </ion-label>
             </ion-item>
             <ion-item-options>
