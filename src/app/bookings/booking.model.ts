@@ -5,6 +5,8 @@ export class Booking {
     public userId: string,
     public placeName: string,
     public placeImg: string,
+    public firstName: string,
+    public lastName: string,
     public eventType: string,
     public bookedFrom: Date,
     public bookedTo: Date,
