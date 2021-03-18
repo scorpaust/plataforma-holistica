@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { LoadingController } from '@ionic/angular';
+import { PlaceLocation } from '../../location.model';
 import { PlacesService } from '../../places.service';
 import { Router } from '@angular/router';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
@@ -46,6 +47,9 @@ export class NewOfferPage implements OnInit {
         updateOn: 'blur',
         validators: [Validators.required, Validators.min(1)],
       }),
+      location: new FormControl(null, {
+        validators: [Validators.required],
+      }),
     });
   }
 
@@ -67,7 +71,8 @@ export class NewOfferPage implements OnInit {
             this.form.value.paytype,
             +this.form.value.price,
             new Date(this.form.value.dateFrom),
-            new Date(this.form.value.dateTo)
+            new Date(this.form.value.dateTo),
+            this.form.value.location
           )
           .subscribe(() => {
             loadingEl.dismiss();
@@ -75,5 +80,9 @@ export class NewOfferPage implements OnInit {
             this.router.navigate(['/espacos/tabs/ofertas']);
           });
       });
+  }
+
+  onLocationPick(location: PlaceLocation) {
+    this.form.patchValue({ location: location });
   }
 }
