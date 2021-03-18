@@ -141,6 +141,12 @@ testem.log
 /e2e/*.js
 /e2e/*.map
 
+# android
+/android/**
+
 # System Files
 .DS_Store
 Thumbs.db
+
+#dist
+/www/**
