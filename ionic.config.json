@@ -1,5 +1,7 @@
 {
   "name": "plataforma-holistica",
-  "integrations": {},
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "angular"
 }
