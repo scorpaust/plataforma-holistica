@@ -7,6 +7,7 @@ import {
 } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { switchMap, take } from 'rxjs/operators';
 
 import { AuthService } from '../../../auth/auth.service';
 import { BookingsService } from '../../../bookings/booking.service';
@@ -47,12 +48,22 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
         return;
       }
       this.isLoading = true;
-      this.placeSub = this.placesService
-        .getPlace(paramMap.get('espacoId'))
+      let fetchedUserId: string;
+      this.authService.userId
+        .pipe(
+          take(1),
+          switchMap((userId) => {
+            if (!userId) {
+              throw new Error('Não encontrado ID de utilizador.');
+            }
+            fetchedUserId = userId;
+            return this.placesService.getPlace(paramMap.get('espacoId'));
+          })
+        )
         .subscribe(
           (place) => {
             this.place = place;
-            this.isBookable = place.userId !== this.authService.userId;
+            this.isBookable = place.userId !== fetchedUserId;
             this.isLoading = false;
           },
           (error) => {

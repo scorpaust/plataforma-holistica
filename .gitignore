@@ -148,13 +148,14 @@ testem.log
 .DS_Store
 Thumbs.db
 
-#dist
+# dist
 /www/**
 
-#firebase
+# firebase
 .firebaserc
 firebase.json
 
-#packages
+# packages
 package.json
 package-lock.json
+*.json

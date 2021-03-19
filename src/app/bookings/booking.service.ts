@@ -1,4 +1,4 @@
-import { delay, map, switchMap, take, tap } from 'rxjs/operators';
+import { map, switchMap, take, tap } from 'rxjs/operators';
 
 import { AuthService } from '../auth/auth.service';
 import { BehaviorSubject } from 'rxjs';
@@ -45,86 +45,112 @@ export class BookingsService {
     dateTo: Date
   ) {
     let generatedId: string;
-    const newBooking = new Booking(
-      Math.random().toString(),
-      placeId,
-      this.authService.userId,
-      placeName,
-      placeImg,
-      firstName,
-      lastName,
-      eventType,
-      dateFrom,
-      dateTo,
-      minGuestNumber,
-      maxGuestNumber
+    let newBooking: Booking;
+    let fetchedUserId: string;
+    return this.authService.userId.pipe(
+      take(1),
+      switchMap((userId) => {
+        if (!userId) {
+          throw new Error('Não foi encontrado nenhum ID de utilizador.');
+        }
+        fetchedUserId = userId;
+        return this.authService.token;
+      }),
+      take(1),
+      switchMap((token) => {
+        newBooking = new Booking(
+          Math.random().toString(),
+          placeId,
+          fetchedUserId,
+          placeName,
+          placeImg,
+          firstName,
+          lastName,
+          eventType,
+          dateFrom,
+          dateTo,
+          minGuestNumber,
+          maxGuestNumber
+        );
+        return this.http.post<{ name: string }>(
+          `https://portal-holistico-1c559-default-rtdb.firebaseio.com/agendamentos.json?auth=${token}`,
+          { ...newBooking, id: null }
+        );
+      }),
+      switchMap((resData) => {
+        generatedId = resData.name;
+        return this.bookings;
+      }),
+      take(1),
+      tap((bookings) => {
+        this._bookings.next(bookings.concat(newBooking));
+      })
     );
-    return this.http
-      .post<{ name: string }>(
-        'https://portal-holistico-1c559-default-rtdb.firebaseio.com/agendamentos.json',
-        { ...newBooking, id: null }
-      )
-      .pipe(
-        switchMap((resData) => {
-          generatedId = resData.name;
-          return this.bookings;
-        }),
-        take(1),
-        tap((bookings) => {
-          this._bookings.next(bookings.concat(newBooking));
-        })
-      );
   }
 
   cancelBooking(bookingId: string) {
-    return this.http
-      .delete(
-        `ht;tps://portal-holistico-1c559-default-rtdb.firebaseio.com/agendamentos/${bookingId}.json`
-      )
-      .pipe(
-        switchMap(() => {
-          return this.bookings;
-        }),
-        take(1),
-        tap((bookings) => {
-          this._bookings.next(bookings.filter((b) => b.id !== bookingId));
-        })
-      );
+    return this.authService.token.pipe(
+      take(1),
+      switchMap((token) => {
+        return this.http.delete(
+          `https://portal-holistico-1c559-default-rtdb.firebaseio.com/agendamentos/${bookingId}.json?auth=${token}`
+        );
+      }),
+      switchMap(() => {
+        return this.bookings;
+      }),
+      take(1),
+      tap((bookings) => {
+        this._bookings.next(bookings.filter((b) => b.id !== bookingId));
+      })
+    );
   }
 
   fetchBookings() {
-    return this.http
-      .get<{ [key: string]: BookingData }>(
-        `https://portal-holistico-1c559-default-rtdb.firebaseio.com/agendamentos.json?agendamentoDe="idUtilizador"&equalto="${this.authService.userId}"`
-      )
-      .pipe(
-        map((bookingData) => {
-          const bookings = [];
-          for (const key in bookingData) {
-            if (bookingData.hasOwnProperty(key)) {
-              bookings.push(
-                new Booking(
-                  key,
-                  bookingData[key].placeId,
-                  bookingData[key].userId,
-                  bookingData[key].placeName,
-                  bookingData[key].placeImg,
-                  bookingData[key].firstName,
-                  bookingData[key].lastName,
-                  bookingData[key].eventType,
-                  new Date(bookingData[key].bookedFrom),
-                  new Date(bookingData[key].bookedTo),
-                  +bookingData[key].minGuestNumber,
-                  +bookingData[key].maxGuestNumber
-                )
-              );
-            }
+    let fetchedUserId: string;
+
+    return this.authService.userId.pipe(
+      take(1),
+      switchMap((userId) => {
+        if (!userId) {
+          throw new Error('Não encontrado ID de utilizador.');
+        }
+        fetchedUserId = userId;
+        return this.authService.token;
+      }),
+      take(1),
+      switchMap((token) => {
+        return this.http.get<{ [key: string]: BookingData }>(
+          `https://portal-holistico-1c559-default-rtdb.firebaseio.com/agendamentos.json?agendamentoDe="idUtilizador"&equalto="${fetchedUserId}"&auth=${token}`
+        );
+      }),
+      map((bookingData) => {
+        const bookings = [];
+        for (const key in bookingData) {
+          if (bookingData.hasOwnProperty(key)) {
+            bookings.push(
+              new Booking(
+                key,
+                bookingData[key].placeId,
+                bookingData[key].userId,
+                bookingData[key].placeName,
+                bookingData[key].placeImg,
+                bookingData[key].firstName,
+                bookingData[key].lastName,
+                bookingData[key].eventType,
+                new Date(bookingData[key].bookedFrom),
+                new Date(bookingData[key].bookedTo),
+                +bookingData[key].minGuestNumber,
+                +bookingData[key].maxGuestNumber
+              )
+            );
           }
-          return bookings;
-        }),
-        tap((bookings) => {
-          this._bookings.next(bookings);
-        })
-      );
+        }
+        return bookings;
+      }),
+      tap((bookings) => {
+        this._bookings.next(bookings);
+      })
+    );
   }
 }

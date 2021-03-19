@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Place } from './place.model';
 import { PlaceLocation } from './location.model';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 interface PlaceData {
   availableFrom: string;
@@ -32,69 +33,79 @@ export class PlacesService {
   }
 
   fetchPlaces() {
-    return this.http
-      .get<{ [key: string]: PlaceData }>(
-        'https://portal-holistico-1c559-default-rtdb.firebaseio.com/espacos-holisticos.json'
-      )
-      .pipe(
-        map((resData) => {
-          const places = [];
+    return this.authService.token.pipe(
+      take(1),
+      switchMap((token) => {
+        return this.http.get<{ [key: string]: PlaceData }>(
+          `https://portal-holistico-1c559-default-rtdb.firebaseio.com/espacos-holisticos.json?auth=${token}`
+        );
+      }),
+      map((resData) => {
+        const places = [];
 
-          for (const key in resData) {
-            if (resData.hasOwnProperty(key)) {
-              places.push(
-                new Place(
-                  key,
-                  resData[key].name,
-                  resData[key].description,
-                  resData[key].imageUrl,
-                  resData[key].payType,
-                  resData[key].price,
-                  new Date(resData[key].availableFrom),
-                  new Date(resData[key].availableTo),
-                  resData[key].userId,
-                  resData[key].location
-                )
-              );
-            }
+        for (const key in resData) {
+          if (resData.hasOwnProperty(key)) {
+            places.push(
+              new Place(
+                key,
+                resData[key].name,
+                resData[key].description,
+                resData[key].imageUrl,
+                resData[key].payType,
+                resData[key].price,
+                new Date(resData[key].availableFrom),
+                new Date(resData[key].availableTo),
+                resData[key].userId,
+                resData[key].location
+              )
+            );
           }
-          return places;
-        }),
-        tap((places) => {
-          this._places.next(places);
-        })
-      );
+        }
+        return places;
+      }),
+      tap((places) => {
+        this._places.next(places);
+      })
+    );
   }
 
   getPlace(id: string) {
-    return this.http
-      .get<PlaceData>(
-        `https://portal-holistico-1c559-default-rtdb.firebaseio.com/espacos-holisticos/${id}.json`
-      )
-      .pipe(
-        map((placeData) => {
-          return new Place(
-            id,
-            placeData.name,
-            placeData.description,
-            placeData.imageUrl,
-            placeData.payType,
-            placeData.price,
-            new Date(placeData.availableFrom),
-            new Date(placeData.availableTo),
-            placeData.userId,
-            placeData.location
-          );
-        })
-      );
+    return this.authService.token.pipe(
+      take(1),
+      switchMap((token) => {
+        return this.http.get<PlaceData>(
+          `https://portal-holistico-1c559-default-rtdb.firebaseio.com/espacos-holisticos/${id}.json?auth=${token}`
+        );
+      }),
+      map((placeData) => {
+        return new Place(
+          id,
+          placeData.name,
+          placeData.description,
+          placeData.imageUrl,
+          placeData.payType,
+          placeData.price,
+          new Date(placeData.availableFrom),
+          new Date(placeData.availableTo),
+          placeData.userId,
+          placeData.location
+        );
+      })
+    );
   }
 
   uploadImage(image: File) {
     const uploadData = new FormData();
     uploadData.append('image', image);
-    return this.http.post<{ imageUrl: string; imagePath: string }>(
-      'https://us-central1-portal-holistico-1c559.cloudfunctions.net/storeImage',
-      uploadData
+    return this.authService.token.pipe(
+      take(1),
+      switchMap((token) => {
+        return this.http.post<{ imageUrl: string; imagePath: string }>(
+          'https://us-central1-portal-holistico-1c559.cloudfunctions.net/storeImage',
+          uploadData,
+          { headers: { Authorization: 'Bearer ' + token } }
+        );
+      })
     );
   }
 
@@ -109,37 +120,49 @@ export class PlacesService {
     location: PlaceLocation
   ) {
     let generatedId: string;
-    const newPlace = new Place(
-      Math.random().toString(),
-      name,
-      description,
-      imgUrl,
-      paytype,
-      price,
-      availableFrom,
-      availableTo,
-      this.authService.userId,
-      location
-    );
-    return this.http
-      .post<{ name: string }>(
-        'https://portal-holistico-1c559-default-rtdb.firebaseio.com/espacos-holisticos.json',
-        {
-          ...newPlace,
-          id: null,
+    let fetchedUserId: string;
+    let newPlace: Place;
+    return this.authService.userId.pipe(
+      take(1),
+      switchMap((userId) => {
+        fetchedUserId = userId;
+        return this.authService.token;
+      }),
+      take(1),
+      switchMap((token) => {
+        if (!fetchedUserId) {
+          throw new Error('Não encontrado ID de utilizador.');
         }
-      )
-      .pipe(
-        switchMap((resData) => {
-          generatedId = resData.name;
-          return this.places;
-        }),
-        take(1),
-        tap((places) => {
-          newPlace.id = generatedId;
-          this._places.next(places.concat(newPlace));
-        })
-      );
+        newPlace = new Place(
+          Math.random().toString(),
+          name,
+          description,
+          imgUrl,
+          paytype,
+          price,
+          availableFrom,
+          availableTo,
+          fetchedUserId,
+          location
+        );
+        return this.http.post<{ name: string }>(
+          `https://portal-holistico-1c559-default-rtdb.firebaseio.com/espacos-holisticos.json?auth=${token}`,
+          {
+            ...newPlace,
+            id: null,
+          }
+        );
+      }),
+      switchMap((resData) => {
+        generatedId = resData.name;
+        return this.places;
+      }),
+      take(1),
+      tap((places) => {
+        newPlace.id = generatedId;
+        this._places.next(places.concat(newPlace));
+      })
+    );
     /* return this.places.pipe(
       delay(1000),
       take(1),
@@ -151,7 +174,12 @@ export class PlacesService {
 
   updatePlace(id: string, name: string, description: string) {
     let updatedPlaces: Place[];
-    return this.places.pipe(
+    let fetchedToken: string;
+    return this.authService.token.pipe(
+      take(1),
+      switchMap((token) => {
+        return this.places;
+      }),
       take(1),
       switchMap((places) => {
         if (!places || places.length <= 0) {
@@ -177,7 +205,7 @@ export class PlacesService {
           oldPlace.location
         );
         return this.http.put(
-          `https://portal-holistico-1c559-default-rtdb.firebaseio.com/espacos-holisticos/${id}.json`,
+          `https://portal-holistico-1c559-default-rtdb.firebaseio.com/espacos-holisticos/${id}.json?auth=${fetchedToken}`,
           {
             ...updatedPlaces[updatedPlaceIndex],
             id: null,
