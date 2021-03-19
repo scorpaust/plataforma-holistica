@@ -4,7 +4,7 @@ import {
   ModalController,
 } from '@ionic/angular';
 import { Capacitor, Plugins } from '@capacitor/core';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Coordinates, PlaceLocation } from '../../../places/location.model';
 import { map, switchMap } from 'rxjs/operators';
 
@@ -23,6 +23,7 @@ export class LocationPickerComponent implements OnInit {
   selectedLocationImage: string;
   isLoading = false;
   @Output() locationPick = new EventEmitter<PlaceLocation>();
+  @Input() showPreview = false;
 
   constructor(
     private modalCtrl: ModalController,
@@ -86,6 +87,7 @@ export class LocationPickerComponent implements OnInit {
       .create({
         header: 'Erro ao obter localização',
         message: 'Por favor, use o mapa para obter uma localização.',
+        buttons: ['OK'],
       })
       .then((alertEl) => {
         alertEl.present();

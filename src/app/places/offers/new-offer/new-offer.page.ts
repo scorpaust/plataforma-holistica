@@ -1,11 +1,33 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { LoadingController } from '@ionic/angular';
 import { PlaceLocation } from '../../location.model';
 import { PlacesService } from '../../places.service';
 import { Router } from '@angular/router';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { SafeUrl } from '@angular/platform-browser';
+import { switchMap } from 'rxjs/operators';
+
+const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
+  const byteCharacters = atob(b64Data);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+
+    byteArrays.push(byteArray);
+  }
+
+  const blob = new Blob(byteArrays, { type: contentType });
+  return blob;
+};
 
 @Component({
   selector: 'app-new-offer',
@@ -14,6 +36,7 @@ import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 })
 export class NewOfferPage implements OnInit {
   form: FormGroup;
+  imageUrl: string;
 
   constructor(
     private placesService: PlacesService,
@@ -50,11 +73,12 @@ export class NewOfferPage implements OnInit {
       location: new FormControl(null, {
         validators: [Validators.required],
       }),
+      image: new FormControl(null),
     });
   }
 
   onCreateOffer() {
-    if (!this.form.valid) {
+    if (!this.form.valid || !this.form.get('image').value) {
       return;
     }
     this.loaderCtrl
@@ -64,15 +88,20 @@ export class NewOfferPage implements OnInit {
       .then((loadingEl) => {
         loadingEl.present();
         this.placesService
-          .addPlace(
-            this.form.value.name,
-            this.form.value.description,
-            'https://a0.muscache.com/im/pictures/3cf8f705-4c7a-48c0-9f94-509df64ad2c9.jpg?im_w=1440',
-            this.form.value.paytype,
-            +this.form.value.price,
-            new Date(this.form.value.dateFrom),
-            new Date(this.form.value.dateTo),
-            this.form.value.location
+          .uploadImage(this.form.get('image').value)
+          .pipe(
+            switchMap((uploadRes) => {
+              return this.placesService.addPlace(
+                this.form.value.name,
+                this.form.value.description,
+                uploadRes.imageUrl,
+                this.form.value.paytype,
+                +this.form.value.price,
+                new Date(this.form.value.dateFrom),
+                new Date(this.form.value.dateTo),
+                this.form.value.location
+              );
+            })
           )
           .subscribe(() => {
             loadingEl.dismiss();
@@ -83,6 +112,24 @@ export class NewOfferPage implements OnInit {
   }
 
   onLocationPick(location: PlaceLocation) {
-    this.form.patchValue({ location: location });
+    this.form.patchValue({ location });
+  }
+
+  onImagePick(imageData: string | File) {
+    let imageFile;
+    if (typeof imageData === 'string') {
+      try {
+        imageFile = b64toBlob(imageData, 'image/jpeg');
+      } catch (error) {
+        console.log(error);
+        return;
+      }
+    } else {
+      imageFile = imageData;
+    }
+    this.form.patchValue({
+      image: imageFile,
+    });
+    this.imageUrl = URL.createObjectURL(imageFile);
   }
 }

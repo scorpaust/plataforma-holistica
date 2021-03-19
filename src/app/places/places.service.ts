@@ -89,6 +89,15 @@ export class PlacesService {
       );
   }
 
+  uploadImage(image: File) {
+    const uploadData = new FormData();
+    uploadData.append('image', image);
+    return this.http.post<{ imageUrl: string; imagePath: string }>(
+      'https://us-central1-portal-holistico-1c559.cloudfunctions.net/storeImage',
+      uploadData
+    );
+  }
+
   addPlace(
     name: string,
     description: string,

@@ -150,3 +150,11 @@ Thumbs.db
 
 #dist
 /www/**
+
+#firebase
+.firebaserc
+firebase.json
+
+#packages
+package.json
+package-lock.json

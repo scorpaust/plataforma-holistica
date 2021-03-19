@@ -1,0 +1,8 @@
+<div class="picker">
+  <ion-img class="image" role="button" [src]="imageUrl" *ngIf="selectedImage && showPreview" (click)="onPickImage()"></ion-img>
+  <ion-button color="primary" (click)="onPickImage()" slot="start" *ngIf="!selectedImage || !showPreview">
+    <ion-icon name="camera"></ion-icon>
+    <ion-label>Selecionar Imagem</ion-label>
+  </ion-button>
+</div>
+<input type="file" *ngIf="usePicker" accept="image/jpeg" #filePicker (change)="onFileChosen($event)" />
